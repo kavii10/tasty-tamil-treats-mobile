@@ -4,6 +4,7 @@ import { recipes } from "@/data/recipes";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { ArrowLeft, Clock, Users, ChefHat } from "lucide-react";
+import IngredientAdjuster from "@/components/IngredientAdjuster";
 
 const RecipeDetail = () => {
   const { id } = useParams();
@@ -76,14 +77,17 @@ const RecipeDetail = () => {
           </div>
         </div>
 
-        {/* Ingredients Section */}
+        {/* AI Ingredient Adjuster */}
+        <IngredientAdjuster recipe={recipe} />
+
+        {/* Original Ingredients Section */}
         <Card className="border-green-100 shadow-sm">
           <CardContent className="p-6">
             <div className="flex items-center mb-4">
               <div className="bg-green-100 p-2 rounded-full mr-3">
                 <span className="text-2xl">🥄</span>
               </div>
-              <h2 className="text-xl font-bold text-gray-800">Ingredients</h2>
+              <h2 className="text-xl font-bold text-gray-800">Original Ingredients</h2>
             </div>
             <p className="text-sm text-gray-600 mb-4 flex items-center">
               <Users className="w-4 h-4 mr-2" />
