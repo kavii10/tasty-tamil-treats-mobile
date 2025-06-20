@@ -9,7 +9,7 @@ import { Search } from "lucide-react";
 const HomePage = () => {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
-  const [showSplash, setShowSplash] = useState(true);
+  const [showSplash, setShowSplash] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
   // Traditional food images
@@ -22,20 +22,28 @@ const HomePage = () => {
   ];
 
   useEffect(() => {
-    // Auto-rotate images during splash screen
-    const imageInterval = setInterval(() => {
-      setCurrentImageIndex((prev) => (prev + 1) % foodImages.length);
-    }, 800);
+    // Check if this is the first time opening the app in this session
+    const hasSeenSplash = sessionStorage.getItem('hasSeenSplash');
+    
+    if (!hasSeenSplash) {
+      setShowSplash(true);
+      sessionStorage.setItem('hasSeenSplash', 'true');
+      
+      // Auto-rotate images during splash screen
+      const imageInterval = setInterval(() => {
+        setCurrentImageIndex((prev) => (prev + 1) % foodImages.length);
+      }, 800);
 
-    // Hide splash screen after 4 seconds
-    const splashTimer = setTimeout(() => {
-      setShowSplash(false);
-    }, 4000);
+      // Hide splash screen after 4 seconds
+      const splashTimer = setTimeout(() => {
+        setShowSplash(false);
+      }, 4000);
 
-    return () => {
-      clearInterval(imageInterval);
-      clearTimeout(splashTimer);
-    };
+      return () => {
+        clearInterval(imageInterval);
+        clearTimeout(splashTimer);
+      };
+    }
   }, []);
 
   const filteredRecipes = recipes.filter(recipe =>

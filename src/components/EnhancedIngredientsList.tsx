@@ -44,14 +44,14 @@ const EnhancedIngredientsList: React.FC<EnhancedIngredientsListProps> = ({
 
   const categories = categorizeIngredients(ingredients);
 
-  const renderCategory = (title: string, items: ScaledIngredient[], bgColor: string, icon: string) => {
+  const renderCategory = (title: string, items: ScaledIngredient[], bgColor: string, textColor: string, icon: string) => {
     if (items.length === 0) return null;
 
     return (
       <div className="mb-4 animate-in fade-in-50 slide-in-from-left-5 duration-500">
         <div className={`${bgColor} px-3 py-2 rounded-lg mb-3 flex items-center space-x-2`}>
           <span className="text-lg">{icon}</span>
-          <h4 className="font-semibold text-gray-800">{title}</h4>
+          <h4 className={`font-semibold ${textColor}`}>{title}</h4>
         </div>
         <ul className="space-y-2 ml-4">
           {items.map((ingredient, index) => (
@@ -126,10 +126,10 @@ const EnhancedIngredientsList: React.FC<EnhancedIngredientsListProps> = ({
           </div>
         )}
 
-        {/* Categorized Sections */}
-        {renderCategory("🔹 For Grinding", categories.grinding, "bg-blue-100", "⚙️")}
-        {renderCategory("🟢 For Seasoning", categories.seasoning, "bg-green-100", "🌿")}
-        {renderCategory("🟣 For Garnish", categories.garnish, "bg-purple-100", "🌸")}
+        {/* Categorized Sections with unique colors */}
+        {renderCategory("🔹 For Grinding", categories.grinding, "bg-gradient-to-r from-orange-100 to-amber-100", "text-orange-800", "⚙️")}
+        {renderCategory("🟢 For Seasoning", categories.seasoning, "bg-gradient-to-r from-emerald-100 to-teal-100", "text-emerald-800", "🌿")}
+        {renderCategory("🟣 For Garnish", categories.garnish, "bg-gradient-to-r from-purple-100 to-pink-100", "text-purple-800", "🌸")}
       </CardContent>
     </Card>
   );
