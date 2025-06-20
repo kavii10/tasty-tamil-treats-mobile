@@ -1,14 +1,21 @@
 
 import { useParams, useNavigate } from "react-router-dom";
+import { useState } from "react";
 import { recipes } from "@/data/recipes";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { ArrowLeft, Clock, Users, ChefHat } from "lucide-react";
-import IngredientAdjuster from "@/components/IngredientAdjuster";
+import AIIngredientBot from "@/components/AIIngredientBot";
+import EnhancedIngredientsList from "@/components/EnhancedIngredientsList";
+import { ScaledIngredient } from "@/utils/ingredientParser";
 
 const RecipeDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const [adjustedIngredients, setAdjustedIngredients] = useState<ScaledIngredient[]>([]);
+  const [adjustedTime, setAdjustedTime] = useState<number>(0);
+  const [servings, setServings] = useState<number>(0);
+  const [showAdjusted, setShowAdjusted] = useState(false);
   
   const recipe = recipes.find(r => r.id === id);
   
@@ -26,19 +33,38 @@ const RecipeDetail = () => {
     );
   }
 
+  const handleAdjustIngredients = (ingredients: ScaledIngredient[], time: number, servingCount: number) => {
+    setAdjustedIngredients(ingredients);
+    setAdjustedTime(time);
+    setServings(servingCount);
+    setShowAdjusted(true);
+    
+    // Smooth scroll to ingredients section
+    setTimeout(() => {
+      const ingredientsSection = document.getElementById('ingredients-section');
+      if (ingredientsSection) {
+        ingredientsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }, 100);
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 to-yellow-50">
       {/* Header */}
       <div className="sticky top-0 bg-white/80 backdrop-blur-sm border-b border-green-100 p-4 z-10">
-        <Button 
-          onClick={() => navigate('/')} 
-          variant="ghost" 
-          size="sm"
-          className="text-green-700 hover:text-green-800 hover:bg-green-50"
-        >
-          <ArrowLeft className="w-4 h-4 mr-2" />
-          Back to Recipes
-        </Button>
+        <div className="flex items-center justify-between">
+          <Button 
+            onClick={() => navigate('/')} 
+            variant="ghost" 
+            size="sm"
+            className="text-green-700 hover:text-green-800 hover:bg-green-50"
+          >
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Back to Recipes
+          </Button>
+          
+          <AIIngredientBot recipe={recipe} onAdjust={handleAdjustIngredients} />
+        </div>
       </div>
 
       {/* Recipe Image */}
@@ -77,32 +103,40 @@ const RecipeDetail = () => {
           </div>
         </div>
 
-        {/* AI Ingredient Adjuster */}
-        <IngredientAdjuster recipe={recipe} />
-
-        {/* Original Ingredients Section */}
-        <Card className="border-green-100 shadow-sm">
-          <CardContent className="p-6">
-            <div className="flex items-center mb-4">
-              <div className="bg-green-100 p-2 rounded-full mr-3">
-                <span className="text-2xl">🥄</span>
-              </div>
-              <h2 className="text-xl font-bold text-gray-800">Original Ingredients</h2>
-            </div>
-            <p className="text-sm text-gray-600 mb-4 flex items-center">
-              <Users className="w-4 h-4 mr-2" />
-              (For 1 person)
-            </p>
-            <ul className="space-y-2">
-              {recipe.ingredients_en.map((ingredient, index) => (
-                <li key={index} className="flex items-start">
-                  <span className="text-green-600 mr-2 mt-1">•</span>
-                  <span className="text-gray-700">{ingredient}</span>
-                </li>
-              ))}
-            </ul>
-          </CardContent>
-        </Card>
+        {/* Ingredients Section */}
+        <div id="ingredients-section">
+          {showAdjusted ? (
+            <EnhancedIngredientsList
+              ingredients={adjustedIngredients}
+              servings={servings}
+              adjustedTime={adjustedTime}
+              originalTime={recipe.cookingTime}
+            />
+          ) : (
+            <Card className="border-green-100 shadow-sm">
+              <CardContent className="p-6">
+                <div className="flex items-center mb-4">
+                  <div className="bg-green-100 p-2 rounded-full mr-3">
+                    <span className="text-2xl">🥄</span>
+                  </div>
+                  <h2 className="text-xl font-bold text-gray-800">Original Ingredients</h2>
+                </div>
+                <p className="text-sm text-gray-600 mb-4 flex items-center">
+                  <Users className="w-4 h-4 mr-2" />
+                  (For 1 person)
+                </p>
+                <ul className="space-y-2">
+                  {recipe.ingredients_en.map((ingredient, index) => (
+                    <li key={index} className="flex items-start">
+                      <span className="text-green-600 mr-2 mt-1">•</span>
+                      <span className="text-gray-700">{ingredient}</span>
+                    </li>
+                  ))}
+                </ul>
+              </CardContent>
+            </Card>
+          )}
+        </div>
 
         {/* Instructions Section */}
         <Card className="border-yellow-100 shadow-sm">
