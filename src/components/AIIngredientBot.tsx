@@ -4,23 +4,28 @@ import { Recipe } from '@/types/Recipe';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Bot, Users, Sparkles } from 'lucide-react';
+import { Bot, Users, Sparkles, AlertCircle } from 'lucide-react';
 import { parseIngredient, scaleIngredient, scaleCookingTime } from '@/utils/ingredientParser';
+import { TogetherAIService } from '@/services/togetherAI';
+import { toast } from 'sonner';
 
 interface AIIngredientBotProps {
   recipe: Recipe;
-  onAdjust: (adjustedIngredients: any[], adjustedTime: number, servings: number) => void;
+  onAdjust: (adjustedIngredients: any[], adjustedTime: number, servings: number, rewrittenSteps?: string[]) => void;
 }
 
 const AIIngredientBot: React.FC<AIIngredientBotProps> = ({ recipe, onAdjust }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [servings, setServings] = useState<number>(1);
+  const [apiKey, setApiKey] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
+  const [rewriteSteps, setRewriteSteps] = useState(true);
 
   const handleAdjust = async () => {
     if (servings <= 0) return;
     
     setIsProcessing(true);
+    toast.info('AI is optimizing ingredients and preparation steps...');
     
     // Simulate AI processing delay for better UX
     await new Promise(resolve => setTimeout(resolve, 1500));
@@ -31,7 +36,28 @@ const AIIngredientBot: React.FC<AIIngredientBotProps> = ({ recipe, onAdjust }) =
     );
     const adjustedCookingTime = scaleCookingTime(recipe.cookingTime, servings);
 
-    onAdjust(scaledIngredients, adjustedCookingTime, servings);
+    let rewrittenSteps: string[] | undefined;
+
+    // If user wants steps rewritten and provided API key
+    if (rewriteSteps && apiKey.trim()) {
+      try {
+        const togetherAI = new TogetherAIService(apiKey.trim());
+        rewrittenSteps = await togetherAI.rewriteRecipeSteps(
+          recipe.name,
+          recipe.instructions_en,
+          scaledIngredients,
+          servings
+        );
+        toast.success('Ingredients and preparation steps optimized successfully!');
+      } catch (error) {
+        console.error('Error rewriting steps:', error);
+        toast.error('Failed to rewrite steps. Ingredients scaled successfully.');
+      }
+    } else {
+      toast.success('Ingredients optimized successfully!');
+    }
+
+    onAdjust(scaledIngredients, adjustedCookingTime, servings, rewrittenSteps);
     setIsProcessing(false);
     setIsOpen(false);
   };
@@ -46,7 +72,7 @@ const AIIngredientBot: React.FC<AIIngredientBotProps> = ({ recipe, onAdjust }) =
         >
           <Bot className="w-4 h-4 mr-2 text-purple-600" />
           <Sparkles className="w-3 h-3 mr-1 text-blue-600" />
-          <span className="text-sm font-medium text-gray-700">Ingredient Optimiser AI</span>
+          <span className="text-sm font-medium text-gray-700">Recipe AI Optimizer</span>
         </Button>
       </DialogTrigger>
       
@@ -56,9 +82,9 @@ const AIIngredientBot: React.FC<AIIngredientBotProps> = ({ recipe, onAdjust }) =
             <Bot className="w-8 h-8 text-white" />
           </div>
           <DialogTitle className="text-xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
-            🧠 Ingredient Optimiser AI
+            🧠 Recipe AI Optimizer
           </DialogTitle>
-          <p className="text-gray-600 mt-2">How many servings do you want to prepare?</p>
+          <p className="text-gray-600 mt-2">Optimize ingredients and preparation steps</p>
         </DialogHeader>
         
         <div className="space-y-6 mt-6">
@@ -67,6 +93,9 @@ const AIIngredientBot: React.FC<AIIngredientBotProps> = ({ recipe, onAdjust }) =
               <Users className="w-5 h-5 text-blue-600" />
             </div>
             <div className="flex-1">
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Number of Servings
+              </label>
               <Input
                 type="number"
                 min="1"
@@ -78,10 +107,53 @@ const AIIngredientBot: React.FC<AIIngredientBotProps> = ({ recipe, onAdjust }) =
               />
             </div>
           </div>
+
+          <div className="space-y-3">
+            <div className="flex items-center space-x-2">
+              <input
+                type="checkbox"
+                id="rewrite-steps"
+                checked={rewriteSteps}
+                onChange={(e) => setRewriteSteps(e.target.checked)}
+                className="rounded border-gray-300"
+              />
+              <label htmlFor="rewrite-steps" className="text-sm font-medium text-gray-700">
+                Also rewrite preparation steps (requires API key)
+              </label>
+            </div>
+
+            {rewriteSteps && (
+              <div className="space-y-3 animate-in fade-in-50 slide-in-from-top-2">
+                <div className="bg-blue-50 p-3 rounded-lg border border-blue-200">
+                  <div className="flex items-start space-x-2">
+                    <AlertCircle className="w-5 h-5 text-blue-600 mt-0.5" />
+                    <div className="text-sm text-blue-800">
+                      <p className="font-medium mb-1">Together AI API Key Required</p>
+                      <p>Get your free API key from <a href="https://api.together.xyz" target="_blank" rel="noopener noreferrer" className="underline">api.together.xyz</a></p>
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  <label htmlFor="api-key" className="block text-sm font-medium text-gray-700 mb-2">
+                    Together AI API Key
+                  </label>
+                  <Input
+                    id="api-key"
+                    type="password"
+                    value={apiKey}
+                    onChange={(e) => setApiKey(e.target.value)}
+                    placeholder="Enter your Together AI API key"
+                    className="border-2 border-amber-200 focus:border-amber-400"
+                  />
+                </div>
+              </div>
+            )}
+          </div>
           
           <Button
             onClick={handleAdjust}
-            disabled={isProcessing || servings <= 0}
+            disabled={isProcessing || servings <= 0 || (rewriteSteps && !apiKey.trim())}
             className="w-full bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 text-white font-semibold py-3 transition-all duration-300"
           >
             {isProcessing ? (
@@ -92,7 +164,7 @@ const AIIngredientBot: React.FC<AIIngredientBotProps> = ({ recipe, onAdjust }) =
             ) : (
               <div className="flex items-center space-x-2">
                 <Sparkles className="w-4 h-4" />
-                <span>Optimize Ingredients</span>
+                <span>Optimize Recipe</span>
               </div>
             )}
           </Button>

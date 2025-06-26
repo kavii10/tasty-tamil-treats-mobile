@@ -7,7 +7,6 @@ import { Card, CardContent } from "@/components/ui/card";
 import { ArrowLeft, Clock, Users, ChefHat } from "lucide-react";
 import AIIngredientBot from "@/components/AIIngredientBot";
 import EnhancedIngredientsList from "@/components/EnhancedIngredientsList";
-import AIStepsRewriter from "@/components/AIStepsRewriter";
 import { ScaledIngredient } from "@/utils/ingredientParser";
 
 const RecipeDetail = () => {
@@ -36,31 +35,24 @@ const RecipeDetail = () => {
     );
   }
 
-  const handleAdjustIngredients = (ingredients: ScaledIngredient[], time: number, servingCount: number) => {
+  const handleAdjustRecipe = (ingredients: ScaledIngredient[], time: number, servingCount: number, rewrittenSteps?: string[]) => {
     setAdjustedIngredients(ingredients);
     setAdjustedTime(time);
     setServings(servingCount);
     setShowAdjusted(true);
-    setShowRewrittenSteps(false); // Reset rewritten steps when ingredients change
+    
+    if (rewrittenSteps) {
+      setRewrittenSteps(rewrittenSteps);
+      setShowRewrittenSteps(true);
+    } else {
+      setShowRewrittenSteps(false);
+    }
     
     // Smooth scroll to ingredients section
     setTimeout(() => {
       const ingredientsSection = document.getElementById('ingredients-section');
       if (ingredientsSection) {
         ingredientsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }
-    }, 100);
-  };
-
-  const handleStepsRewritten = (newSteps: string[]) => {
-    setRewrittenSteps(newSteps);
-    setShowRewrittenSteps(true);
-    
-    // Smooth scroll to instructions section
-    setTimeout(() => {
-      const instructionsSection = document.getElementById('instructions-section');
-      if (instructionsSection) {
-        instructionsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
       }
     }, 100);
   };
@@ -82,18 +74,7 @@ const RecipeDetail = () => {
             Back to Recipes
           </Button>
           
-          <div className="flex items-center space-x-2">
-            <AIIngredientBot recipe={recipe} onAdjust={handleAdjustIngredients} />
-            {showAdjusted && (
-              <AIStepsRewriter
-                recipeName={recipe.name}
-                originalSteps={recipe.instructions_en}
-                adjustedIngredients={adjustedIngredients}
-                servings={servings}
-                onStepsRewritten={handleStepsRewritten}
-              />
-            )}
-          </div>
+          <AIIngredientBot recipe={recipe} onAdjust={handleAdjustRecipe} />
         </div>
       </div>
 
