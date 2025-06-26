@@ -4,7 +4,7 @@ import { Recipe } from '@/types/Recipe';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Bot, Users, Sparkles, AlertCircle } from 'lucide-react';
+import { Bot, Users, Sparkles } from 'lucide-react';
 import { parseIngredient, scaleIngredient, scaleCookingTime } from '@/utils/ingredientParser';
 import { TogetherAIService } from '@/services/togetherAI';
 import { toast } from 'sonner';
@@ -17,9 +17,11 @@ interface AIIngredientBotProps {
 const AIIngredientBot: React.FC<AIIngredientBotProps> = ({ recipe, onAdjust }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [servings, setServings] = useState<number>(1);
-  const [apiKey, setApiKey] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
   const [rewriteSteps, setRewriteSteps] = useState(true);
+
+  // Hardcoded API key
+  const TOGETHER_AI_API_KEY = '3a6b9f5b20c4e95eb38113d825e3518b709fe2a588ae498abe105d9cbc81c971';
 
   const handleAdjust = async () => {
     if (servings <= 0) return;
@@ -38,10 +40,10 @@ const AIIngredientBot: React.FC<AIIngredientBotProps> = ({ recipe, onAdjust }) =
 
     let rewrittenSteps: string[] | undefined;
 
-    // If user wants steps rewritten and provided API key
-    if (rewriteSteps && apiKey.trim()) {
+    // If user wants steps rewritten, use the hardcoded API key
+    if (rewriteSteps) {
       try {
-        const togetherAI = new TogetherAIService(apiKey.trim());
+        const togetherAI = new TogetherAIService(TOGETHER_AI_API_KEY);
         rewrittenSteps = await togetherAI.rewriteRecipeSteps(
           recipe.name,
           recipe.instructions_en,
@@ -118,42 +120,14 @@ const AIIngredientBot: React.FC<AIIngredientBotProps> = ({ recipe, onAdjust }) =
                 className="rounded border-gray-300"
               />
               <label htmlFor="rewrite-steps" className="text-sm font-medium text-gray-700">
-                Also rewrite preparation steps (requires API key)
+                Also rewrite preparation steps with AI
               </label>
             </div>
-
-            {rewriteSteps && (
-              <div className="space-y-3 animate-in fade-in-50 slide-in-from-top-2">
-                <div className="bg-blue-50 p-3 rounded-lg border border-blue-200">
-                  <div className="flex items-start space-x-2">
-                    <AlertCircle className="w-5 h-5 text-blue-600 mt-0.5" />
-                    <div className="text-sm text-blue-800">
-                      <p className="font-medium mb-1">Together AI API Key Required</p>
-                      <p>Get your free API key from <a href="https://api.together.xyz" target="_blank" rel="noopener noreferrer" className="underline">api.together.xyz</a></p>
-                    </div>
-                  </div>
-                </div>
-
-                <div>
-                  <label htmlFor="api-key" className="block text-sm font-medium text-gray-700 mb-2">
-                    Together AI API Key
-                  </label>
-                  <Input
-                    id="api-key"
-                    type="password"
-                    value={apiKey}
-                    onChange={(e) => setApiKey(e.target.value)}
-                    placeholder="Enter your Together AI API key"
-                    className="border-2 border-amber-200 focus:border-amber-400"
-                  />
-                </div>
-              </div>
-            )}
           </div>
           
           <Button
             onClick={handleAdjust}
-            disabled={isProcessing || servings <= 0 || (rewriteSteps && !apiKey.trim())}
+            disabled={isProcessing || servings <= 0}
             className="w-full bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 text-white font-semibold py-3 transition-all duration-300"
           >
             {isProcessing ? (
