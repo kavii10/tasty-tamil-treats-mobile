@@ -1,4 +1,3 @@
-
 import { useParams, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { recipes } from "@/data/recipes";
@@ -18,6 +17,7 @@ const RecipeDetail = () => {
   const [showAdjusted, setShowAdjusted] = useState(false);
   const [rewrittenSteps, setRewrittenSteps] = useState<string[]>([]);
   const [showRewrittenSteps, setShowRewrittenSteps] = useState(false);
+  const [isTransitioning, setIsTransitioning] = useState(false);
   
   const recipe = recipes.find(r => r.id === id);
   
@@ -36,25 +36,39 @@ const RecipeDetail = () => {
   }
 
   const handleAdjustRecipe = (ingredients: ScaledIngredient[], time: number, servingCount: number, rewrittenSteps?: string[]) => {
-    setAdjustedIngredients(ingredients);
-    setAdjustedTime(time);
-    setServings(servingCount);
-    setShowAdjusted(true);
+    setIsTransitioning(true);
     
-    if (rewrittenSteps) {
-      setRewrittenSteps(rewrittenSteps);
-      setShowRewrittenSteps(true);
-    } else {
-      setShowRewrittenSteps(false);
-    }
-    
-    // Smooth scroll to ingredients section
+    // First, fade out current content
     setTimeout(() => {
-      const ingredientsSection = document.getElementById('ingredients-section');
-      if (ingredientsSection) {
-        ingredientsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      setAdjustedIngredients(ingredients);
+      setAdjustedTime(time);
+      setServings(servingCount);
+      setShowAdjusted(true);
+      
+      if (rewrittenSteps) {
+        setRewrittenSteps(rewrittenSteps);
+        setShowRewrittenSteps(true);
+      } else {
+        setShowRewrittenSteps(false);
       }
-    }, 100);
+      
+      // Fade in new content
+      setTimeout(() => {
+        setIsTransitioning(false);
+        
+        // Smooth scroll to ingredients section
+        setTimeout(() => {
+          const ingredientsSection = document.getElementById('ingredients-section');
+          if (ingredientsSection) {
+            ingredientsSection.scrollIntoView({ 
+              behavior: 'smooth', 
+              block: 'start',
+              inline: 'nearest'
+            });
+          }
+        }, 200);
+      }, 100);
+    }, 300);
   };
 
   const currentSteps = showRewrittenSteps ? rewrittenSteps : recipe.instructions_en;
@@ -97,11 +111,11 @@ const RecipeDetail = () => {
           <p className="text-xl text-gray-600 font-medium">{recipe.tamilName}</p>
           
           <div className="flex items-center justify-center space-x-4 mt-4">
-            <div className="flex items-center text-amber-600">
+            <div className={`flex items-center text-amber-600 transition-all duration-500 ${isTransitioning ? 'opacity-50 scale-95' : 'opacity-100 scale-100'}`}>
               <Clock className="w-5 h-5 mr-1" />
               <span className="font-semibold">{showAdjusted ? adjustedTime : recipe.cookingTime} min</span>
               {showAdjusted && adjustedTime !== recipe.cookingTime && (
-                <span className="text-xs text-gray-500 ml-1">
+                <span className="text-xs text-gray-500 ml-1 animate-fade-in">
                   (was {recipe.cookingTime} min)
                 </span>
               )}
@@ -120,14 +134,16 @@ const RecipeDetail = () => {
         </div>
 
         {/* Ingredients Section */}
-        <div id="ingredients-section">
+        <div id="ingredients-section" className={`transition-all duration-500 ${isTransitioning ? 'opacity-0 translate-y-4' : 'opacity-100 translate-y-0'}`}>
           {showAdjusted ? (
-            <EnhancedIngredientsList
-              ingredients={adjustedIngredients}
-              servings={servings}
-              adjustedTime={adjustedTime}
-              originalTime={recipe.cookingTime}
-            />
+            <div className="animate-in fade-in-50 slide-in-from-bottom-4 duration-700">
+              <EnhancedIngredientsList
+                ingredients={adjustedIngredients}
+                servings={servings}
+                adjustedTime={adjustedTime}
+                originalTime={recipe.cookingTime}
+              />
+            </div>
           ) : (
             <Card className="border-green-100 shadow-sm">
               <CardContent className="p-6">
@@ -155,7 +171,7 @@ const RecipeDetail = () => {
         </div>
 
         {/* Instructions Section */}
-        <div id="instructions-section">
+        <div id="instructions-section" className={`transition-all duration-500 delay-200 ${isTransitioning ? 'opacity-0 translate-y-4' : 'opacity-100 translate-y-0'}`}>
           <Card className="border-yellow-100 shadow-sm">
             <CardContent className="p-6">
               <div className="flex items-center mb-4">
@@ -167,7 +183,7 @@ const RecipeDetail = () => {
                     {showRewrittenSteps ? 'AI-Optimized Preparation' : 'Preparation'}
                   </h2>
                   {showRewrittenSteps && (
-                    <p className="text-sm text-amber-600 mt-1">
+                    <p className="text-sm text-amber-600 mt-1 animate-fade-in">
                       Steps adjusted for {servings} serving{servings > 1 ? 's' : ''}
                     </p>
                   )}
@@ -175,7 +191,15 @@ const RecipeDetail = () => {
               </div>
               <ol className="space-y-4">
                 {currentSteps.map((instruction, index) => (
-                  <li key={index} className="flex items-start">
+                  <li 
+                    key={index} 
+                    className={`flex items-start transition-all duration-300 ${
+                      showRewrittenSteps ? 'animate-in fade-in-50 slide-in-from-left-4' : ''
+                    }`}
+                    style={{ 
+                      animationDelay: showRewrittenSteps ? `${index * 150}ms` : '0ms' 
+                    }}
+                  >
                     <span className="bg-yellow-500 text-white text-sm font-bold rounded-full w-6 h-6 flex items-center justify-center mr-3 mt-0.5 flex-shrink-0">
                       {index + 1}
                     </span>
