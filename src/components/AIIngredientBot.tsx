@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Bot, Users, Sparkles } from 'lucide-react';
 import { parseIngredient, scaleIngredient, scaleCookingTime } from '@/utils/ingredientParser';
-import { TogetherAIService } from '@/services/togetherAI';
+import { LocalStepRewriter } from '@/services/stepRewriter';
 import { toast } from 'sonner';
 
 interface AIIngredientBotProps {
@@ -20,17 +20,14 @@ const AIIngredientBot: React.FC<AIIngredientBotProps> = ({ recipe, onAdjust }) =
   const [isProcessing, setIsProcessing] = useState(false);
   const [rewriteSteps, setRewriteSteps] = useState(true);
 
-  // Hardcoded API key
-  const TOGETHER_AI_API_KEY = '3a6b9f5b20c4e95eb38113d825e3518b709fe2a588ae498abe105d9cbc81c971';
-
   const handleAdjust = async () => {
     if (servings <= 0) return;
     
     setIsProcessing(true);
-    toast.info('AI is optimizing ingredients and preparation steps...');
+    toast.info('Optimizing ingredients and preparation steps...');
     
-    // Simulate AI processing delay for better UX
-    await new Promise(resolve => setTimeout(resolve, 1500));
+    // Simulate processing delay for better UX
+    await new Promise(resolve => setTimeout(resolve, 1000));
     
     const parsedIngredients = recipe.ingredients_en.map(parseIngredient);
     const scaledIngredients = parsedIngredients.map(ingredient => 
@@ -40,12 +37,11 @@ const AIIngredientBot: React.FC<AIIngredientBotProps> = ({ recipe, onAdjust }) =
 
     let rewrittenSteps: string[] | undefined;
 
-    // If user wants steps rewritten, use the hardcoded API key
+    // If user wants steps rewritten, use local step rewriter
     if (rewriteSteps) {
       try {
-        const togetherAI = new TogetherAIService(TOGETHER_AI_API_KEY);
-        rewrittenSteps = await togetherAI.rewriteRecipeSteps(
-          recipe.name,
+        const stepRewriter = new LocalStepRewriter();
+        rewrittenSteps = stepRewriter.rewriteSteps(
           recipe.instructions_en,
           scaledIngredients,
           servings
@@ -74,7 +70,7 @@ const AIIngredientBot: React.FC<AIIngredientBotProps> = ({ recipe, onAdjust }) =
         >
           <Bot className="w-4 h-4 mr-2 text-purple-600" />
           <Sparkles className="w-3 h-3 mr-1 text-blue-600" />
-          <span className="text-sm font-medium text-gray-700">Recipe AI Optimizer</span>
+          <span className="text-sm font-medium text-gray-700">Recipe Optimizer</span>
         </Button>
       </DialogTrigger>
       
@@ -84,9 +80,9 @@ const AIIngredientBot: React.FC<AIIngredientBotProps> = ({ recipe, onAdjust }) =
             <Bot className="w-8 h-8 text-white" />
           </div>
           <DialogTitle className="text-xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
-            🧠 Recipe AI Optimizer
+            🧠 Recipe Optimizer
           </DialogTitle>
-          <p className="text-gray-600 mt-2">Optimize ingredients and preparation steps</p>
+          <p className="text-gray-600 mt-2">Smart ingredient & step adjustment</p>
         </DialogHeader>
         
         <div className="space-y-6 mt-6">
@@ -120,7 +116,7 @@ const AIIngredientBot: React.FC<AIIngredientBotProps> = ({ recipe, onAdjust }) =
                 className="rounded border-gray-300"
               />
               <label htmlFor="rewrite-steps" className="text-sm font-medium text-gray-700">
-                Also rewrite preparation steps with AI
+                Also adjust preparation steps intelligently
               </label>
             </div>
           </div>
@@ -133,7 +129,7 @@ const AIIngredientBot: React.FC<AIIngredientBotProps> = ({ recipe, onAdjust }) =
             {isProcessing ? (
               <div className="flex items-center space-x-2">
                 <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                <span>AI is optimizing...</span>
+                <span>Optimizing...</span>
               </div>
             ) : (
               <div className="flex items-center space-x-2">
