@@ -8,15 +8,26 @@ interface StepRewriteRule {
 
 export class LocalStepRewriter {
   private rules: StepRewriteRule[] = [
-    // Quantity-based replacements
+    // Quantity-based replacements using actual scaled ingredient amounts
     {
-      pattern: /(\d+(?:\.\d+)?(?:\/\d+)?)\s*(tsp|tbsp|cup|cups|teaspoon|tablespoon|handful|pinch|clove|cloves|inch|gram|grams|ml|liter|litre)/gi,
+      pattern: /(\d+(?:\.\d+)?(?:\/\d+)?)\s*(tsp|tbsp|cup|cups|teaspoon|tablespoon|handful|pinch|clove|cloves|inch|gram|grams|ml|liter|litre|pieces?|nos?)/gi,
       replacement: (match, scaledIngredients, servings) => {
-        const ingredient = this.findMatchingIngredient(match, scaledIngredients);
+        const ingredient = this.findMatchingIngredientByMeasurement(match, scaledIngredients);
         if (ingredient && ingredient.formattedAmount) {
           return `${ingredient.formattedAmount}${ingredient.unit ? ` ${ingredient.unit}` : ''}`;
         }
         return this.scaleQuantityInText(match, servings);
+      }
+    },
+    // Ingredient name-based replacements
+    {
+      pattern: /\b(onion|tomato|garlic|ginger|chili|pepper|salt|oil|water|rice|dal|lentil|cumin|mustard|turmeric|coriander|curry leaves|coconut|tamarind|jaggery|sugar)\b/gi,
+      replacement: (match, scaledIngredients, servings) => {
+        const ingredient = this.findMatchingIngredientByName(match, scaledIngredients);
+        if (ingredient && ingredient.formattedAmount) {
+          return `${ingredient.formattedAmount}${ingredient.unit ? ` ${ingredient.unit}` : ''} ${ingredient.name}`;
+        }
+        return match;
       }
     },
     // Time-based adjustments
@@ -69,12 +80,51 @@ export class LocalStepRewriter {
     return rewrittenStep;
   }
 
-  private findMatchingIngredient(text: string, ingredients: ScaledIngredient[]): ScaledIngredient | null {
+  private findMatchingIngredientByMeasurement(text: string, ingredients: ScaledIngredient[]): ScaledIngredient | null {
+    const measurementMatch = text.match(/(\d+(?:\.\d+)?(?:\/\d+)?)\s*([a-zA-Z]+)/);
+    if (!measurementMatch) return null;
+
+    const [, quantity, unit] = measurementMatch;
+    const normalizedUnit = this.normalizeUnit(unit);
+    
+    return ingredients.find(ingredient => {
+      if (!ingredient.unit || !ingredient.amount) return false;
+      const ingredientUnit = this.normalizeUnit(ingredient.unit);
+      const quantityMatch = Math.abs(parseFloat(quantity) - ingredient.amount) < 0.1;
+      const unitMatch = ingredientUnit === normalizedUnit;
+      return quantityMatch && unitMatch;
+    }) || null;
+  }
+
+  private findMatchingIngredientByName(text: string, ingredients: ScaledIngredient[]): ScaledIngredient | null {
     const cleanText = text.toLowerCase();
-    return ingredients.find(ingredient => 
-      cleanText.includes(ingredient.name.toLowerCase().split(' ')[0]) ||
-      ingredient.name.toLowerCase().includes(cleanText.split(' ')[0])
-    ) || null;
+    return ingredients.find(ingredient => {
+      const ingredientName = ingredient.name.toLowerCase();
+      return ingredientName.includes(cleanText) || 
+             cleanText.includes(ingredientName.split(' ')[0]) ||
+             ingredient.name.toLowerCase().split(' ').some(word => word.includes(cleanText));
+    }) || null;
+  }
+
+  private normalizeUnit(unit: string): string {
+    const unitMap: { [key: string]: string } = {
+      'tsp': 'tsp',
+      'teaspoon': 'tsp',
+      'tbsp': 'tbsp',
+      'tablespoon': 'tbsp',
+      'cup': 'cup',
+      'cups': 'cup',
+      'gram': 'g',
+      'grams': 'g',
+      'ml': 'ml',
+      'liter': 'l',
+      'litre': 'l',
+      'piece': 'piece',
+      'pieces': 'piece',
+      'no': 'no',
+      'nos': 'no'
+    };
+    return unitMap[unit.toLowerCase()] || unit.toLowerCase();
   }
 
   private scaleQuantityInText(text: string, servings: number): string {
