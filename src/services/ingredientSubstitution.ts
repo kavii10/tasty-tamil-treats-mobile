@@ -1,7 +1,6 @@
-
 import { IngredientSubstitution } from '@/types/PantryTypes';
 
-export class IngredientSubstitution {
+export class IngredientSubstitutionService {
   private substitutions: { [key: string]: { [reason: string]: string } } = {
     // Dairy substitutions
     'milk': {

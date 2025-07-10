@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -17,7 +16,7 @@ import {
 import { PantryMatcher } from '@/services/pantryMatcher';
 import { NutritionCalculator } from '@/services/nutritionCalculator';
 import { WeatherSuggestions } from '@/services/weatherSuggestions';
-import { IngredientSubstitution } from '@/services/ingredientSubstitution';
+import { IngredientSubstitutionService } from '@/services/ingredientSubstitution';
 import { PantryItem, RecipeMatch, NutritionInfo, WeatherBasedSuggestion } from '@/types/PantryTypes';
 
 const IntelligentFeatures = () => {
@@ -32,7 +31,7 @@ const IntelligentFeatures = () => {
   const pantryMatcher = new PantryMatcher();
   const nutritionCalculator = new NutritionCalculator();
   const weatherSuggestions = new WeatherSuggestions();
-  const ingredientSubstitution = new IngredientSubstitution();
+  const ingredientSubstitution = new IngredientSubstitutionService();
 
   const addPantryItems = () => {
     if (!pantryInput.trim()) return;
