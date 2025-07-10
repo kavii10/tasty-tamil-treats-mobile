@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -125,8 +124,10 @@ const IntelligentFeaturesHub: React.FC<IntelligentFeaturesHubProps> = ({
           break;
           
         case 'substitute':
-          const substitutions = ingredientSubstitution.findSubstitutions(recipeIngredients, ['dairy'], []);
-          setFeatureResults({ type: 'substitute', data: substitutions });
+          // Set some example preferences for demonstration
+          ingredientSubstitution.setUserPreferences(['dairy'], ['vegan'], []);
+          const substitutionResult = ingredientSubstitution.processIngredients(recipeIngredients);
+          setFeatureResults({ type: 'substitute', data: substitutionResult.substitutions });
           break;
           
         default:
@@ -196,6 +197,25 @@ const IntelligentFeaturesHub: React.FC<IntelligentFeaturesHubProps> = ({
                 Perfect weather for {data.recipes.slice(0, 2).map((r: any) => r.name).join(', ')}
               </div>
             </div>
+          </div>
+        );
+        
+      case 'substitute':
+        return (
+          <div className="space-y-2">
+            <h4 className="font-semibold text-yellow-700">Ingredient Substitutions:</h4>
+            {data.length > 0 ? (
+              data.map((sub: any, index: number) => (
+                <div key={index} className="p-2 bg-yellow-50 rounded-lg">
+                  <div className="text-sm">
+                    <span className="font-medium">{sub.original}</span> → <span className="text-yellow-700 font-medium">{sub.substitute}</span>
+                  </div>
+                  <div className="text-xs text-yellow-600 capitalize">Reason: {sub.reason}</div>
+                </div>
+              ))
+            ) : (
+              <div className="text-sm text-gray-600">No substitutions needed for current preferences</div>
+            )}
           </div>
         );
         
