@@ -19,6 +19,43 @@ import { WeatherSuggestions } from '@/services/weatherSuggestions';
 import { IngredientSubstitutionService } from '@/services/ingredientSubstitution';
 import { PantryItem, RecipeMatch, NutritionInfo, WeatherBasedSuggestion } from '@/types/PantryTypes';
 
+// Feature Logo Components
+const PantryLogo = () => (
+  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-green-400 to-emerald-600 flex items-center justify-center shadow-lg">
+    <Utensils className="w-6 h-6 text-white" />
+  </div>
+);
+
+const NutritionLogo = () => (
+  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-orange-400 to-red-500 flex items-center justify-center shadow-lg">
+    <Calculator className="w-6 h-6 text-white" />
+  </div>
+);
+
+const WeatherLogo = () => (
+  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-400 to-cyan-600 flex items-center justify-center shadow-lg">
+    <Cloud className="w-6 h-6 text-white" />
+  </div>
+);
+
+const PlannerLogo = () => (
+  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-purple-400 to-indigo-600 flex items-center justify-center shadow-lg">
+    <Calendar className="w-6 h-6 text-white" />
+  </div>
+);
+
+const DietLogo = () => (
+  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-pink-400 to-rose-600 flex items-center justify-center shadow-lg">
+    <ChefHat className="w-6 h-6 text-white" />
+  </div>
+);
+
+const SubstituteLogo = () => (
+  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-yellow-400 to-amber-600 flex items-center justify-center shadow-lg">
+    <RefreshCw className="w-6 h-6 text-white" />
+  </div>
+);
+
 const IntelligentFeatures = () => {
   const [pantryItems, setPantryItems] = useState<PantryItem[]>([]);
   const [pantryInput, setPantryInput] = useState('');
@@ -93,40 +130,83 @@ const IntelligentFeatures = () => {
           <p className="text-gray-600">AI-powered cooking assistance without the complexity</p>
         </div>
 
+        {/* Feature Overview Cards */}
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-6">
+          <div className="flex flex-col items-center space-y-2 p-4 bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow">
+            <PantryLogo />
+            <span className="text-xs font-medium text-gray-700 text-center">Pantry Match</span>
+          </div>
+          <div className="flex flex-col items-center space-y-2 p-4 bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow">
+            <NutritionLogo />
+            <span className="text-xs font-medium text-gray-700 text-center">Nutrition</span>
+          </div>
+          <div className="flex flex-col items-center space-y-2 p-4 bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow">
+            <WeatherLogo />
+            <span className="text-xs font-medium text-gray-700 text-center">Weather</span>
+          </div>
+          <div className="flex flex-col items-center space-y-2 p-4 bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow">
+            <PlannerLogo />
+            <span className="text-xs font-medium text-gray-700 text-center">Planner</span>
+          </div>
+          <div className="flex flex-col items-center space-y-2 p-4 bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow">
+            <DietLogo />
+            <span className="text-xs font-medium text-gray-700 text-center">Diet</span>
+          </div>
+          <div className="flex flex-col items-center space-y-2 p-4 bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow">
+            <SubstituteLogo />
+            <span className="text-xs font-medium text-gray-700 text-center">Substitute</span>
+          </div>
+        </div>
+
         <Tabs defaultValue="pantry" className="w-full">
           <TabsList className="grid w-full grid-cols-3 lg:grid-cols-6">
             <TabsTrigger value="pantry" className="flex items-center gap-2">
-              <Utensils className="w-4 h-4" />
-              Pantry
+              <div className="w-6 h-6 rounded-full bg-gradient-to-br from-green-400 to-emerald-600 flex items-center justify-center">
+                <Utensils className="w-3 h-3 text-white" />
+              </div>
+              <span className="hidden sm:inline">Pantry</span>
             </TabsTrigger>
             <TabsTrigger value="nutrition" className="flex items-center gap-2">
-              <Calculator className="w-4 h-4" />
-              Nutrition
+              <div className="w-6 h-6 rounded-full bg-gradient-to-br from-orange-400 to-red-500 flex items-center justify-center">
+                <Calculator className="w-3 h-3 text-white" />
+              </div>
+              <span className="hidden sm:inline">Nutrition</span>
             </TabsTrigger>
             <TabsTrigger value="weather" className="flex items-center gap-2">
-              <Cloud className="w-4 h-4" />
-              Weather
+              <div className="w-6 h-6 rounded-full bg-gradient-to-br from-blue-400 to-cyan-600 flex items-center justify-center">
+                <Cloud className="w-3 h-3 text-white" />
+              </div>
+              <span className="hidden sm:inline">Weather</span>
             </TabsTrigger>
             <TabsTrigger value="planner" className="flex items-center gap-2">
-              <Calendar className="w-4 h-4" />
-              Planner
+              <div className="w-6 h-6 rounded-full bg-gradient-to-br from-purple-400 to-indigo-600 flex items-center justify-center">
+                <Calendar className="w-3 h-3 text-white" />
+              </div>
+              <span className="hidden sm:inline">Planner</span>
             </TabsTrigger>
             <TabsTrigger value="diet" className="flex items-center gap-2">
-              <ChefHat className="w-4 h-4" />
-              Diet
+              <div className="w-6 h-6 rounded-full bg-gradient-to-br from-pink-400 to-rose-600 flex items-center justify-center">
+                <ChefHat className="w-3 h-3 text-white" />
+              </div>
+              <span className="hidden sm:inline">Diet</span>
             </TabsTrigger>
             <TabsTrigger value="substitute" className="flex items-center gap-2">
-              <RefreshCw className="w-4 h-4" />
-              Substitute
+              <div className="w-6 h-6 rounded-full bg-gradient-to-br from-yellow-400 to-amber-600 flex items-center justify-center">
+                <RefreshCw className="w-3 h-3 text-white" />
+              </div>
+              <span className="hidden sm:inline">Substitute</span>
             </TabsTrigger>
           </TabsList>
 
           <TabsContent value="pantry" className="space-y-4">
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Utensils className="w-5 h-5" />
-                  Pantry-Based Recipe Generator
+                <CardTitle className="flex items-center gap-3">
+                  <PantryLogo />
+                  <div>
+                    <div>Pantry-Based Recipe Generator</div>
+                    <div className="text-sm text-gray-500 font-normal">Find recipes from your ingredients</div>
+                  </div>
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -192,16 +272,19 @@ const IntelligentFeatures = () => {
           <TabsContent value="nutrition" className="space-y-4">
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Calculator className="w-5 h-5" />
-                  Nutrition & Calorie Estimator
+                <CardTitle className="flex items-center gap-3">
+                  <NutritionLogo />
+                  <div>
+                    <div>Nutrition & Calorie Estimator</div>
+                    <div className="text-sm text-gray-500 font-normal">Calculate recipe nutrition facts</div>
+                  </div>
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <Button 
                   onClick={() => calculateNutrition(['1 cup rice', '2 tbsp oil', '1 tsp salt'])}
                   disabled={isLoading}
-                  className="bg-blue-600 hover:bg-blue-700"
+                  className="bg-orange-600 hover:bg-orange-700"
                 >
                   {isLoading ? 'Calculating...' : 'Calculate Sample Recipe Nutrition'}
                 </Button>
@@ -241,9 +324,12 @@ const IntelligentFeatures = () => {
           <TabsContent value="weather" className="space-y-4">
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Cloud className="w-5 h-5" />
-                  Weather-Based Food Suggestions
+                <CardTitle className="flex items-center gap-3">
+                  <WeatherLogo />
+                  <div>
+                    <div>Weather-Based Food Suggestions</div>
+                    <div className="text-sm text-gray-500 font-normal">Recipes perfect for today's weather</div>
+                  </div>
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -299,9 +385,12 @@ const IntelligentFeatures = () => {
           <TabsContent value="planner">
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Calendar className="w-5 h-5" />
-                  Meal Planner AI (Coming Soon)
+                <CardTitle className="flex items-center gap-3">
+                  <PlannerLogo />
+                  <div>
+                    <div>Meal Planner AI (Coming Soon)</div>
+                    <div className="text-sm text-gray-500 font-normal">7-day automated meal planning</div>
+                  </div>
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -316,9 +405,12 @@ const IntelligentFeatures = () => {
           <TabsContent value="diet">
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <ChefHat className="w-5 h-5" />
-                  Smart Diet Rewriter (Coming Soon)
+                <CardTitle className="flex items-center gap-3">
+                  <DietLogo />
+                  <div>
+                    <div>Smart Diet Rewriter (Coming Soon)</div>
+                    <div className="text-sm text-gray-500 font-normal">Adapt recipes for special diets</div>
+                  </div>
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -333,9 +425,12 @@ const IntelligentFeatures = () => {
           <TabsContent value="substitute">
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <RefreshCw className="w-5 h-5" />
-                  Dynamic Ingredient Swapper (Coming Soon)
+                <CardTitle className="flex items-center gap-3">
+                  <SubstituteLogo />
+                  <div>
+                    <div>Dynamic Ingredient Swapper (Coming Soon)</div>
+                    <div className="text-sm text-gray-500 font-normal">Smart ingredient substitutions</div>
+                  </div>
                 </CardTitle>
               </CardHeader>
               <CardContent>
