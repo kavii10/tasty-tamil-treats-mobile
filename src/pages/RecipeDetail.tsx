@@ -1,3 +1,4 @@
+
 import { useParams, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { recipes } from "@/data/recipes";
@@ -6,6 +7,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { ArrowLeft, Clock, Users, ChefHat } from "lucide-react";
 import AIIngredientBot from "@/components/AIIngredientBot";
 import EnhancedIngredientsList from "@/components/EnhancedIngredientsList";
+import IntelligentFeaturesHub from "@/components/IntelligentFeaturesHub";
 import { ScaledIngredient } from "@/utils/ingredientParser";
 
 const RecipeDetail = () => {
@@ -131,6 +133,14 @@ const RecipeDetail = () => {
               {recipe.category}
             </div>
           </div>
+        </div>
+
+        {/* AI Features Hub */}
+        <div className="relative">
+          <IntelligentFeaturesHub 
+            recipeIngredients={recipe.ingredients_en}
+            recipeName={recipe.name}
+          />
         </div>
 
         {/* Ingredients Section */}
